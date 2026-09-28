@@ -2,8 +2,7 @@
 # Dockerfile used by d2vm to create Kali qcow2 disk images.
 # Build from the repository root:
 # docker buildx build --platform linux/amd64 -f labenv/Dockerfile.kali -t labenv:kali --load labenv
-# d2vm convert --platform linux/amd64 --bootloader grub --network-manager netplan --size 40G --boot-size 512 --output labenv-kali.qcow2 labenv:kali
-# For arm64, use the patched d2vm from build-vm.yml and --bootloader grub-efi.
+# d2vm convert --platform linux/amd64 --bootloader grub --network-manager netplan --size 20G --output labenv-kali.qcow2 labenv:kali
 # After boot, connect a VNC viewer to VM_IP:5901 (password: ubuntu).
 # These are lab credentials; change the login and VNC passwords before wider access.
 
@@ -30,10 +29,7 @@ apt-get install -y sudo man-db vim nano file jq unzip tree procps htop curl wget
 
 # A virtual XFCE desktop does not require a display manager or physical display.
 apt-get install -y --no-install-recommends xfce4 xfce4-terminal dbus-x11 \
-    tigervnc-standalone-server tigervnc-tools xauth fonts-dejavu-core
-
-# The Kali Docker base is minimal; install the tools shipped in default Kali images.
-apt-get install -y kali-linux-default
+    tigervnc-standalone-server tigervnc-tools xauth fonts-dejavu-core kali-linux-default
 
 if [ "$TARGETARCH" = "amd64" ]; then 
     apt-get install -y virtualbox-guest-utils

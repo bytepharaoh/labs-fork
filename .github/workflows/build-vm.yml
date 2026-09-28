@@ -40,36 +40,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-utils wget parted kpartx dosfstools cryptsetup
+          sudo apt-get install -y qemu-utils wget
 
-      # v0.4.0 embeds a Debian/Kali template with a hardcoded amd64 kernel.
-      # Build from the pinned release with an architecture-aware kernel selection.
-      - name: Check out d2vm source
-        uses: actions/checkout@v4
-        with:
-          repository: linka-cloud/d2vm
-          ref: v0.4.0
-          path: .d2vm-src
-
-      - name: Set up Go for d2vm
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: .d2vm-src/go.mod
-          cache: false
-
-      - name: Patch and install d2vm
+      - name: Install d2vm
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          template = Path('.d2vm-src/templates/debian.Dockerfile')
-          source = template.read_text()
-          old = 'linux-image-amd64'
-          if source.count(old) != 1:
-              raise SystemExit('d2vm template changed; review the kernel workaround')
-          template.write_text(source.replace(old, 'linux-image-$(dpkg --print-architecture)'))
-          PY
-          go -C .d2vm-src build -o "$RUNNER_TEMP/d2vm" ./cmd/d2vm
-          sudo install -m 755 "$RUNNER_TEMP/d2vm" /usr/local/bin/d2vm
+          wget https://github.com/linka-cloud/d2vm/releases/download/v0.4.0/d2vm_v0.4.0_linux_${{ inputs.arch }}.tar.gz
+          tar -C /usr/local/bin -xzvf d2vm_v0.4.0_linux_${{ inputs.arch }}.tar.gz d2vm
 
       - name: Build Docker Image
         uses: docker/build-push-action@v5
@@ -94,8 +70,7 @@ jobs:
             --platform linux/${{ inputs.arch }} \
             --bootloader $BOOTLOADER \
             --network-manager netplan \
-            --size 40G \
-            --boot-size 512 \
+            --size 20G \
             --password vagrant \
             --output disk-${{ inputs.arch }}.qcow2 \
             labenv:vm-${{ inputs.arch }}
