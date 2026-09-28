@@ -51,7 +51,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: labenv
-          file: labenv/Dockerfile.vm
+          file: labenv/Dockerfile.kali
           platforms: linux/${{ inputs.arch }}
           tags: labenv:vm-${{ inputs.arch }}
           load: true
